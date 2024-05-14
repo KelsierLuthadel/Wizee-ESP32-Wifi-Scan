@@ -4,6 +4,9 @@
 
 WiFiScan::WiFiScan()
 {
+  setMode(WIFI_STA);
+  // disconnect();
+  
   this->bssid = NULL;
   this->password = NULL;
 
@@ -13,6 +16,9 @@ WiFiScan::WiFiScan()
 
 WiFiScan::WiFiScan(Display* display)
 {
+  setMode(WIFI_STA);
+  // disconnect();
+  
   this->bssid = NULL;
   this->password = NULL;
 
@@ -22,6 +28,8 @@ WiFiScan::WiFiScan(Display* display)
 
 WiFiScan::WiFiScan(const char* bssid, const char* password, Display* display)
 {
+  setMode(WIFI_STA);
+
   this->setBSSID(bssid);
   this->setPassword(password);
 
@@ -45,12 +53,6 @@ WiFiScan::~WiFiScan()
 void WiFiScan::attachDisplay(Display* display)
 {
   this->display = display;
-}
-
-void WiFiScan::init()
-{
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
 }
 
 bool WiFiScan::connect()
@@ -100,34 +102,49 @@ void WiFiScan::disconnect()
 
 void WiFiScan::scan(bool showStrength, bool showChannel)
 {
+  int font_height = 16;
+      
+  display->setCursor(0,0);
+  display->setTextColor(BLACK);
+
+  Serial.println("Scan");
   int networksFound = WiFi.scanNetworks();
-  display->clear(WHITE);
 
   if (networksFound == 0)
   {
-    display->println("no network found");
+    display->output(8, 0, "no network found");
+    Serial.println("Not found");
+
   }
   else
   {
-    display->scr("Networks: " + (String)networksFound);
+    display->clear(WHITE);
+    display->setTextColor(BLUE);
+    display->output(8, 0, "Networks discovered: " + (String)networksFound + ". Monitor mode: Off");
+    display->setTextColor(BLACK);
 
     int y = 1;
 
     for (int i = 0; i < networksFound; ++i) 
     {
-      if (y > 16) 
+      if (y > 6) 
       {
+        display->setTextColor(RED);
+        display->output(8, (y+3)*font_height, "Secure your WiFi. Hack the planet");
+        display->setTextColor(BLACK);
         delay(3000);
-        display->clear();
-        display->scr("Networks: " + (String)networksFound);
-        y=0;
+        display->clear(WHITE);
+        display->setTextColor(BLUE);
+        display->output(8, 0, "Networks discovered: " + (String)networksFound + ". Monitor mode: Off");
+        display->setTextColor(BLACK);
+        y=1;
       }
 
       unsigned int position = i+1;
       
       String ssid = (String)WiFi.SSID(i).substring(0,15);
-      String open = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? "  ": " *";
-      String network = (String)position + ":" + ssid ;
+      String open = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " *": "";
+      String network = (String)position + ":" + ssid + " : " ;
 
       if (showChannel)
       {
@@ -136,22 +153,25 @@ void WiFiScan::scan(bool showStrength, bool showChannel)
 
       if (showStrength)
       {
-        network += " (" + (String)(WiFi.RSSI(i)) + ")";
+        network += " (" + (String)(WiFi.RSSI(i)) + " db)";
       }
 
       network += open;
 
-      display->scr(network);
-
+      display->output(8, (y+1)*font_height, network);
       y++;
     }
 
+    display->setTextColor(RED);
+    display->output(8, (y+3)*font_height, "Secure your WiFi. Hack the planet");
+    display->setTextColor(BLACK);
 		delay(3000);
 	}
 }
 
-void handler(WiFiEvent_t event, WiFiEventInfo_t info)
+void handler(WiFiEvent_t event) 
 {
+    // Serial.printf("[WiFi-event] event: %d\n", event);
     switch (event) {
         case ARDUINO_EVENT_WIFI_READY: 
             Serial.println("WiFi interface ready");
@@ -239,7 +259,6 @@ void handler(WiFiEvent_t event, WiFiEventInfo_t info)
     }
 }
 
-
 void WiFiScan::setMode(wifi_mode_t type)
 {
   WiFi.mode(type);
@@ -276,14 +295,12 @@ void WiFiScan::setPassword(const char* password)
   }
 }
 
-void WiFiScan::WiFiScan::startServer(const char* bssid, const char* password)
+void WiFiScan::startServer(const char* bssid, const char* password)
 {
-  
-  display->println("Starting server");
   
   WiFi.softAP(bssid, password);
   IPAddress myIP = WiFi.softAPIP();
   
-  display->println("AP IP address: " + myIP.toString());
+  // display->println("AP IP address: " + myIP.toString());
   WiFi.onEvent(handler);
 }

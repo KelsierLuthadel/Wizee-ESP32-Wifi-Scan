@@ -33,35 +33,24 @@ class Display {
 public:
   Display(bool serial = false);
   void init();
-  void init(uint16_t xPos, uint16_t yPos );
   void rotate(uint8_t r); // Set the display image orientation to 0, 1, 2 or 3
   void clear();
   void clear(uint32_t color);
 
-  bool getSerialOutput() { return serialOutput; }
-  void setSerialOutput(bool show) { serialOutput = show; }
   void setScreenColor(uint16_t color);
-  void setCursor(uint16_t x, uint16_t y); 
+  void setCursor(int16_t x, int16_t y); 
   void setFont(const GFXfont *f = NULL);
   void setTextSize(uint8_t size);
   void setTextColor(uint16_t fg_color);
   void setTextColor(uint16_t fg_color, uint16_t bg_color, bool bgfill = false);
 
   void output(int32_t x, int32_t y, const String& value);
-  void print(const String& value);
-  void println(const String& value);
-  void scr(const String& value);
-
-  void print(int32_t value);
-  void println(int32_t value);
 
 private:
   bool serialOutput;
   uint16_t color;
-  uint16_t startXPos;
-  uint16_t startYPos;
-  uint16_t xPos;
-  uint16_t yPos;
+  int16_t xPos;
+  int16_t yPos;
 };
 
 #endif
