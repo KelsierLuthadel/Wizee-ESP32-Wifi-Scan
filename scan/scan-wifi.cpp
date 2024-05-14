@@ -152,7 +152,6 @@ void WiFiScan::scan(bool showStrength, bool showChannel)
 
 void handler(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-  // Serial.printf("[WiFi-event] event: %d\n", event);
     switch (event) {
         case ARDUINO_EVENT_WIFI_READY: 
             Serial.println("WiFi interface ready");
@@ -285,6 +284,6 @@ void WiFiScan::WiFiScan::startServer(const char* bssid, const char* password)
   WiFi.softAP(bssid, password);
   IPAddress myIP = WiFi.softAPIP();
   
-  display->println(AP IP address: " + myIP.toString());
+  display->println("AP IP address: " + myIP.toString());
   WiFi.onEvent(handler);
 }
